@@ -2,7 +2,8 @@ import argparse
 import torch
 import torch.optim as optim
 from load_data import *
-from models.model import *
+from models.model import CNNModel
+from models.functions import train, test, score
 import numpy as np
 
 # Settings
@@ -21,7 +22,7 @@ args = parser.parse_args()
 
 torch.random.manual_seed(42)
 
-net = Net(args)
+net = CNNModel()
 
 # Optimizer
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate)
