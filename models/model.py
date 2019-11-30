@@ -26,7 +26,7 @@ class CNNModel(nn.Module):
         self.class_classifier.add_module('c_bn2', nn.BatchNorm1d(100))
         self.class_classifier.add_module('c_relu2', nn.ReLU(True))
         self.class_classifier.add_module('c_fc3', nn.Linear(100, 10))
-        self.class_classifier.add_module('c_softmax', nn.LogSoftmax())
+        self.class_classifier.add_module('c_softmax', nn.LogSoftmax(dim=1))
 
         self.domain_discriminator = nn.Sequential()
         self.domain_discriminator.add_module('d_fc1', nn.Linear(50 * 4 * 4, 100))

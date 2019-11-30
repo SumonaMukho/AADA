@@ -40,8 +40,7 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             alpha=0.1
 
             # Training using source data
-            input_source = data_source_iter.next()
-            s_img, s_label, _ = input_source
+            s_img, s_label, _ = data_source_iter.next()
             s_img, s_label = s_img.type(torch.FloatTensor), s_label.type(torch.LongTensor)
             domain_label_source = torch.ones(args.batch_size, dtype=torch.long)
             if args.cuda:
@@ -58,8 +57,7 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             
             # Training using target data
             
-            input_target = data_target_iter.next()
-            t_img, t_label, t_idx = input_target
+            t_img, t_label, t_idx = data_target_iter.next()
             t_img, t_label, t_idx = t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor),t_idx.type(torch.LongTensor).cpu().numpy()
             domain_label_target = torch.zeros(args.batch_size, dtype=torch.long)
             if args.cuda:
@@ -82,7 +80,8 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             optimizer.step()
 
         # Show statistics
-        print('Epoch: %d, [i: %d / %d] & Losses : Cs=%f, Ds=%f, Dt: %f' \
+        if args.verbose:
+            print('Epoch: %d, [i: %d / %d] & Losses : Cs=%f, Ds=%f, Dt: %f' \
               % (epoch, i, len_dataloader, error_s_class.cpu().data.numpy(),
                  error_s_domain.cpu().data.numpy(), error_t_domain.cpu().data.numpy()))
 
@@ -113,17 +112,20 @@ def test(net, args, test_loader_target):
 
     accuracy = nb_correct_classification.numpy() / nb_samples
     dom_accuracy = nb_correct_domain.numpy() / nb_samples
-    print('accuracy in label classif test: %f' % (accuracy))
-    print('accuracy in domain classif test: %f' % (dom_accuracy))
+    print('\t Ac: %f & Ad: %f' % (accuracy, dom_accuracy))
 
 
-def score(model, args, train_loader_target):
+def score(model, args, train_loader_target, known_labels):
     model.eval()
     # p = look in original paper for clues
     # alpha = look in original paper for clues
     s = False
     for data, target, idx in train_loader_target:
         data, target, idx = data.type(torch.FloatTensor), target.type(torch.LongTensor), idx.type(torch.LongTensor).cpu().numpy()
+        idx_filter = np.logical_not(np.isin(idx, known_labels))
+        if (idx_filter==False).all():
+            continue
+        data, target = data[idx_filter], target[idx_filter]
         if args.cuda:
             data = data.cuda()
             target = target.cuda()
@@ -133,7 +135,7 @@ def score(model, args, train_loader_target):
         
         w = (1 - df) / df  # Importance weight
         
-        H = lambda x : torch.sum((-1 * torch.mm(F.softmax(x, dim=1), F.log_softmax(x, dim=1).transpose(0, 1))), dim=1)
+        H = lambda x : -1*torch.sum(torch.exp(x)* x, dim=1)
         if s is False:
             s = w * H(cf)
             s = s.cpu()

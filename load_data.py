@@ -9,10 +9,6 @@ from PIL import Image
 torch.manual_seed(42)
 
 class iMNIST(datasets.MNIST):
-    def get_data(self):
-        data = self.data.unsqueeze(1)
-        data = data.expand(data.shape[0],3,data.shape[2],data.shape[3])
-        return data
         
     def __init__(self, root, train=True, transform=None, target_transform=None,
                  download=False):
@@ -20,7 +16,19 @@ class iMNIST(datasets.MNIST):
         
  
     def __getitem__(self, index):
-        d, l = super(iMNIST, self).__getitem__(index)
+        #d, l = super(iMNIST, self).__getitem__(index)
+        d,l = self.data[index], int(self.targets[index])
+
+        # doing this so that it is consistent with all other datasets
+        # to return a PIL Image
+        d = Image.fromarray(d.numpy(), mode='L').convert("RGB")
+
+        if self.transform is not None:
+            d = self.transform(d)
+
+        if self.target_transform is not None:
+            l = self.target_transform(l)
+
         return d, l, index 
 
 
@@ -36,4 +44,5 @@ class iSVHN(datasets.SVHN):
         return d, l, index
 
 svhn_transform = transforms.Compose([transforms.Resize((28, 28)), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-mnist_transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1)), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+#mnist_transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.repeat(3, 1, 1)), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+mnist_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
