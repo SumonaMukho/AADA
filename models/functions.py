@@ -116,20 +116,29 @@ def test(net, args, test_loader_target):
     print('accuracy in domain classif test: %f' % (dom_accuracy))
 
 
-def score(model, args, data, target):
+def score(model, args, train_loader_target):
     model.eval()
     # p = look in original paper for clues
     # alpha = look in original paper for clues
-    data, target = data.type(torch.FloatTensor), target.type(torch.LongTensor)
-    if args.cuda:
-        data = data.cuda()
-        target = target.cuda()
-    cf,df = model(data,target)
-    
-    df = df[:,0] / df.sum(dim=1)
-    
-    w = (1 - df) / df  # Importance weight
-    
-    H = lambda x : torch.sum((-1 * torch.mm(F.softmax(x, dim=1), F.log_softmax(x, dim=1).transpose(0, 1))), dim=1)
-    s = w * H(cf)
-    return s
+    s = False
+    for data, target, idx in train_loader_target:
+        data, target, idx = data.type(torch.FloatTensor), target.type(torch.LongTensor), idx.type(torch.LongTensor).cpu().numpy()
+        if args.cuda:
+            data = data.cuda()
+            target = target.cuda()
+        cf,df = model(data,target)
+        
+        df = df[:,0] / df.sum(dim=1)
+        
+        w = (1 - df) / df  # Importance weight
+        
+        H = lambda x : torch.sum((-1 * torch.mm(F.softmax(x, dim=1), F.log_softmax(x, dim=1).transpose(0, 1))), dim=1)
+        if s is False:
+            s = w * H(cf)
+            idxs = idx
+        else:
+            s2 = w * H(cf)
+            s = torch.cat(s,s2)
+            idxs = np.concatenate((idxs, idx))
+
+    return idxs, s
