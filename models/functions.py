@@ -96,13 +96,13 @@ def test(net, args, test_loader_target):
     nb_samples = 0
     nb_correct_domain = 0
 
-    for _, (t_img, t_label) in enumerate(test_loader_target):
+    for t_img, t_label, _ in test_loader_target:
         t_img, t_label= t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor)
         if args.cuda:
             t_img, t_label = t_img.cuda(), t_label.cuda()
             
         with torch.no_grad():
-            class_output, domain_output, _ = net(t_img, 0)
+            class_output, domain_output = net(t_img, 0)
         prediction = torch.argmax(class_output, dim=1)
         domain_pred = torch.argmax(domain_output, dim=1)
 
@@ -128,7 +128,7 @@ def score(model, args, train_loader_target):
             target = target.cuda()
         with torch.no_grad():
             cf,df = model(data,target)
-        df = df[:,0] / df.sum(dim=1)
+        df = df[:,1] / df.sum(dim=1)
         
         w = (1 - df) / df  # Importance weight
         
