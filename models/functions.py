@@ -75,12 +75,12 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             loss.backward()
             optimizer.step()
 
-            # Show statistics
-            print('Epoch: %d, [i: %d / %d] & Losses : Cs=%f, Ds=%f, Dt: %f' \
+        # Show statistics
+        print('Epoch: %d, [i: %d / %d] & Losses : Cs=%f, Ds=%f, Dt: %f' \
               % (epoch, i, len_dataloader, error_s_class.cpu().data.numpy(),
                  error_s_domain.cpu().data.numpy(), error_t_domain.cpu().data.numpy()))
 
-            return net
+    return net
 
 
 def test(net, args, test_loader_target):
