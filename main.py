@@ -60,7 +60,6 @@ for experiment in range(args.nb_experiments):
     for round in range(args.max_round):
         print("Picking labels")
         idxs, scores = score(net, args, target_train_loader)
-        scores = scores.cpu().numpy()
         new_labels = scores.argsort()[-args.b:]
         new_labels = idxs[new_labels]
         known_labels.append(new_labels)
