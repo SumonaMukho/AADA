@@ -106,6 +106,7 @@ def test(net, args, test_loader_target):
 
 
 def score(model, data, target):
+    model.eval()
     # p = look in original paper for clues
     # alpha = look in original paper for clues
     data, target = data.type(torch.FloatTensor), target.type(torch.LongTensor)

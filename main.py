@@ -44,23 +44,23 @@ target_test_loader = torch.utils.data.DataLoader(target_test, batch_size=args.ba
 
 # The process
 for experiment in range(args.nb_experiments):
-    net.train()
+    print("First training")
     net = train(net, args, optimizer, source_train_loader, target_train_loader, None)
-    print("First train finished")
 
 
     # Active Learning process
-    print("Start Active Learning Process")
     for round in range(args.max_round):
-        net.eval()
+        print("Picking labels")
         scores = score(net, target_train_loader.dataset.get_data(), target_train_loader.dataset.targets)
         scores = scores.cpu().numpy()
-        known_labels.append(scores.argsort()[-args.b:])
+        new_labels = scores.argsort()[-args.b:]
+        known_labels.append(new_labels)
         assert len(known_labels)==(round+1)*args.b
+        print("\tPicked ",new_labels)
 
-        print("Round ", round + 1, " finished")
         # Retrain
-        net.train()
+        print("Training on new labels")
         net = train(net, args, optimizer, source_train_loader, target_train_loader, known_labels)
-
+        print("Validating")
+        test(net,args,target_test_loader)
     print("Test for results of experiment ", experiment)
