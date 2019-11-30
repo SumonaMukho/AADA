@@ -138,7 +138,7 @@ def score(model, args, train_loader_target):
             idxs = idx
         else:
             s2 = w * H(cf)
-            s = torch.cat(s,s2)
+            s = torch.cat((s,s2))
             idxs = np.concatenate((idxs, idx))
 
     return idxs, s
