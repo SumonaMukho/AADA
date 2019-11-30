@@ -57,7 +57,7 @@ for experiment in range(args.nb_experiments):
     # Active Learning process
     for round in range(args.max_round):
         print("Picking labels")
-        idxs, scores = score(net, args, target_train_loader.dataset.get_data(), target_train_loader.dataset.targets)
+        idxs, scores = score(net, args, target_train_loader)
         scores = scores.cpu().numpy()
         new_labels = scores.argsort()[-args.b:]
         new_labels = idxs[new_labels]
