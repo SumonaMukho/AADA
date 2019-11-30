@@ -17,7 +17,9 @@ parser.add_argument("--learning_rate", default=0.001, type=float)
 parser.add_argument("--max_round", default=5, type=int)
 parser.add_argument("--nb_experiments", default=1, type=int)
 parser.add_argument("--b", default=10, type=int, help="budget per round")
-parser.add_argument("--cuda", default=torch.cuda.is_available(), type=bool, help="Use of CUDA")
+parser.add_argument('--cuda', dest='cuda', action='store_true')
+parser.add_argument('--no-cuda', dest='cuda', action='store_false')
+parser.set_defaults(cuda=torch.cuda.is_available())
 
 args = parser.parse_args()
 

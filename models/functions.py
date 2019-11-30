@@ -123,6 +123,7 @@ def score(model, args, train_loader_target):
     s = False
     for data, target, idx in train_loader_target:
         data, target, idx = data.type(torch.FloatTensor), target.type(torch.LongTensor), idx.type(torch.LongTensor).cpu().numpy()
+        print(data.shape)
         if args.cuda:
             data = data.cuda()
             target = target.cuda()
@@ -140,5 +141,6 @@ def score(model, args, train_loader_target):
             s2 = w * H(cf)
             s = torch.cat((s,s2))
             idxs = np.concatenate((idxs, idx))
+        print(s.shape,idxs.shape)
 
     return idxs, s
