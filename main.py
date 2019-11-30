@@ -26,6 +26,9 @@ torch.random.manual_seed(42)
 net = CNNModel()
 if args.cuda:
     net.cuda()
+    print("Using CUDA")
+else:
+    print("Using CPU")
 
 # Optimizer
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate)
