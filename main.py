@@ -44,7 +44,7 @@ target_test_loader = torch.utils.data.DataLoader(target_test, batch_size=args.ba
 
 # The process
 for experiment in range(args.nb_experiments):
-
+    net.train()
     net = train(net, args, optimizer, source_train_loader, target_train_loader, None)
     print("First train finished")
 
@@ -52,11 +52,6 @@ for experiment in range(args.nb_experiments):
     # Active Learning process
     print("Start Active Learning Process")
     for round in range(args.max_round):
-
-        optimal_discriminator = net.domain_discriminator
-        classifier = net.class_classifier
-        feature_extractor = net.feature_extractor
-
         net.eval()
         scores = score(net, target_train_loader.dataset.get_data(), target_train_loader.dataset.targets)
         scores = scores.cpu().numpy()
@@ -65,6 +60,7 @@ for experiment in range(args.nb_experiments):
 
         print("Round ", round + 1, " finished")
         # Retrain
+        net.train()
         net = train(net, args, optimizer, source_train_loader, target_train_loader, known_labels)
 
     print("Test for results of experiment ", experiment)
