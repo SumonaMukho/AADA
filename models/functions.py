@@ -114,7 +114,7 @@ def test(net, args, test_loader_target):
     print('accuracy in domain classif test: %f' % (dom_accuracy))
 
 
-def score(model, data, target):
+def score(model, args, data, target):
     model.eval()
     # p = look in original paper for clues
     # alpha = look in original paper for clues
