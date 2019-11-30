@@ -62,7 +62,7 @@ for experiment in range(args.nb_experiments):
         idxs, scores = score(net, args, target_train_loader)
         new_labels = scores.argsort()[-args.b:]
         new_labels = idxs[new_labels]
-        known_labels.append(new_labels)
+        known_labels += new_labels
         print(len(known_labels),(round+1)*args.b)
         assert len(known_labels)==(round+1)*args.b
         print("\tPicked ",new_labels)
