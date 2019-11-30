@@ -58,18 +58,17 @@ for experiment in range(args.nb_experiments):
 
     # Active Learning process
     for round in range(args.max_round):
-        print("Picking labels")
+        print("Picking labels : ")
         idxs, scores = score(net, args, target_train_loader)
         new_labels = scores.argsort()[-args.b:]
         new_labels = idxs[new_labels]
-        known_labels += new_labels
-        print(len(known_labels),(round+1)*args.b)
+        known_labels += new_labels.tolist()
         assert len(known_labels)==(round+1)*args.b
-        print("\tPicked ",new_labels)
+        print("\tPicked",len(new_labels),"labels")
 
         # Retrain
         print("Training on new labels")
         net = train(net, args, optimizer, source_train_loader, target_train_loader, known_labels)
-        print("Validating")
+        print("Validating\n")
         test(net,args,target_test_loader)
     print("Test for results of experiment ", experiment)

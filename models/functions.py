@@ -67,8 +67,9 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
 
             class_output_target, domain_output_target = net(t_img, alpha)
             if known_labels:
-                error_t_class = classification_loss(class_output_target[np.isin(t_idx,known_labels)] , t_label[np.isin(t_idx,known_labels)])
+                print(np.unique(np.isin(t_idx,known_labels),return_counts=True))
                 print("nb known labels",t_label[np.isin(t_idx,known_labels)].shape)
+                error_t_class = classification_loss(class_output_target[np.isin(t_idx,known_labels)] , t_label[np.isin(t_idx,known_labels)])
             else:
                 error_t_class = 0
             error_t_domain = domain_loss(domain_output_target, domain_label_target)
