@@ -1,1 +1,1 @@
-## This is a pytorch implementation of the paper *Active Adversarial Domain Adaptation*
+Implementation of "Active Adversarial Domain Adaptation" (Su et al., 2019) [arXiv](https://arxiv.org/abs/1904.07848)
