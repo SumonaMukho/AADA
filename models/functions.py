@@ -101,8 +101,9 @@ def test(net, args, test_loader_target):
         t_img, t_label= t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor)
         if args.cuda:
             t_img, t_label = t_img.cuda(), t_label.cuda()
-
-        class_output, domain_output, _ = net(t_img, 0)
+            
+        with torch.no_grad():
+            class_output, domain_output, _ = net(t_img, 0)
         prediction = torch.argmax(class_output, dim=1)
         domain_pred = torch.argmax(domain_output, dim=1)
 
@@ -126,8 +127,8 @@ def score(model, args, train_loader_target):
         if args.cuda:
             data = data.cuda()
             target = target.cuda()
-        cf,df = model(data,target)
-        
+        with torch.no_grad():
+            cf,df = model(data,target)
         df = df[:,0] / df.sum(dim=1)
         
         w = (1 - df) / df  # Importance weight
@@ -135,10 +136,11 @@ def score(model, args, train_loader_target):
         H = lambda x : torch.sum((-1 * torch.mm(F.softmax(x, dim=1), F.log_softmax(x, dim=1).transpose(0, 1))), dim=1)
         if s is False:
             s = w * H(cf)
+            s = s.cpu()
             idxs = idx
         else:
             s2 = w * H(cf)
-            s = torch.cat((s,s2))
+            s = torch.cat((s,s2.cpu()))
             idxs = np.concatenate((idxs, idx))
 
     return idxs, s.cpu().numpy()
