@@ -42,9 +42,10 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             input_source = data_source_iter.next()
             s_img, s_label, _ = input_source
             s_img, s_label = s_img.type(torch.FloatTensor), s_label.type(torch.LongTensor)
+            domain_label_source = torch.ones(args.batch_size, dtype=torch.long)
             if args.cuda:
                 s_img, s_label = s_img.cuda(), s_label.cuda()
-            domain_label_source = torch.ones(args.batch_size, dtype=torch.long)
+                domain_label_source = domain_label_source.cuda()
 
             net.zero_grad()
 
@@ -59,9 +60,10 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             input_target = data_target_iter.next()
             t_img, t_label, t_idx = input_target
             t_img, t_label, t_idx = t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor),t_idx.type(torch.LongTensor).cpu().numpy()
+            domain_label_target = torch.zeros(args.batch_size, dtype=torch.long)
             if args.cuda:
                 t_img, t_label = t_img.cuda(), t_label.cuda()
-            domain_label_target = torch.zeros(args.batch_size, dtype=torch.long)
+                domain_label_target = domain_label_target.cuda()
 
             class_output_target, domain_output_target = net(t_img, alpha)
             if known_labels:
