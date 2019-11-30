@@ -36,7 +36,8 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
 
             
             p = float(i + epoch * len_dataloader) / args.n_epochs / len_dataloader
-            alpha = 2. / (1. + np.exp(-10 * p)) - 1
+            #alpha = 2. / (1. + np.exp(-10 * p)) - 1
+            alpha=0.1
 
             # Training using source data
             input_source = data_source_iter.next()
@@ -49,7 +50,7 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
 
             net.zero_grad()
 
-            class_output, domain_output = net(s_img, alpha)
+            class_output, domain_output = net(s_img, args.alpha)
             error_s_class = classification_loss(class_output, s_label)
             error_s_domain = domain_loss(domain_output, domain_label_source)
 
@@ -65,7 +66,7 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
                 t_img, t_label = t_img.cuda(), t_label.cuda()
                 domain_label_target = domain_label_target.cuda()
 
-            class_output_target, domain_output_target = net(t_img, alpha)
+            class_output_target, domain_output_target = net(t_img, args.alpha)
             if known_labels and (np.isin(t_idx,known_labels)==True).any():
                 error_t_class = classification_loss(class_output_target[np.isin(t_idx,known_labels)] , t_label[np.isin(t_idx,known_labels)])
             else:
@@ -102,7 +103,7 @@ def test(net, args, test_loader_target):
             t_img, t_label = t_img.cuda(), t_label.cuda()
             
         with torch.no_grad():
-            class_output, domain_output = net(t_img, 0)
+            class_output, domain_output = net(t_img, args.alpha)
         prediction = torch.argmax(class_output, dim=1)
         domain_pred = torch.argmax(domain_output, dim=1)
 
@@ -127,7 +128,7 @@ def score(model, args, train_loader_target):
             data = data.cuda()
             target = target.cuda()
         with torch.no_grad():
-            cf,df = model(data,target)
+            cf,df = model(data,args.alpha)
         df = df[:,1] / df.sum(dim=1)
         
         w = (1 - df) / df  # Importance weight
