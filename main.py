@@ -14,7 +14,7 @@ parser.add_argument("--target_dataset", default="mnist", type=str, help="Name of
 parser.add_argument("--n_epochs", default=60, type=int, help="Number of epochs")
 parser.add_argument("--batch_size", default=128, type=int, help="Size of batch")
 parser.add_argument("--learning_rate", default=0.0002, type=float)
-parser.add_argument("--max_round", default=5, type=int)
+parser.add_argument("--max_round", default=30, type=int)
 parser.add_argument("--nb_experiments", default=1, type=int)
 parser.add_argument("--b", default=10, type=int, help="budget per round")
 parser.add_argument("--alpha", default=0.1, type=float, help="Parameter of the mixture of losses")
