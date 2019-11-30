@@ -34,14 +34,16 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
 
         for i in range(0, len_dataloader, args.batch_size):
 
-            # Pass to cuda
+            
             p = float(i + epoch * len_dataloader) / args.n_epochs / len_dataloader
             alpha = 2. / (1. + np.exp(-10 * p)) - 1
 
             # Training using source data
             input_source = data_source_iter.next()
-            s_img, s_label, s_idx = input_source
-            s_img, s_label, s_idx = s_img.type(torch.FloatTensor), s_label.type(torch.LongTensor), s_idx.type(torch.LongTensor)
+            s_img, s_label, _ = input_source
+            s_img, s_label = s_img.type(torch.FloatTensor), s_label.type(torch.LongTensor)
+            if args.cuda:
+                s_img, s_label = s_img.cuda(), s_label.cuda()
             domain_label_source = torch.ones(args.batch_size, dtype=torch.long)
 
             net.zero_grad()
@@ -57,6 +59,8 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             input_target = data_target_iter.next()
             t_img, t_label, t_idx = input_target
             t_img, t_label, t_idx = t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor),t_idx.type(torch.LongTensor).cpu().numpy()
+            if args.cuda:
+                t_img, t_label = t_img.cuda(), t_label.cuda()
             domain_label_target = torch.zeros(args.batch_size, dtype=torch.long)
 
             class_output_target, domain_output_target = net(t_img, alpha)
@@ -89,20 +93,25 @@ def test(net, args, test_loader_target):
 
     nb_correct_classification = 0
     nb_samples = 0
+    nb_correct_domain = 0
 
     for _, (t_img, t_label) in enumerate(test_loader_target):
-        t_img, t_label = t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor)
+        t_img, t_label= t_img.type(torch.FloatTensor), t_label.type(torch.LongTensor)
+        if args.cuda:
+            t_img, t_label = t_img.cuda(), t_label.cuda()
 
-        # Pass to cuda
-
-        class_output, _ = net(t_img, 0)
-        prediction = torch.max(class_output, dim=1)
+        class_output, domain_output, _ = net(t_img, 0)
+        prediction = torch.argmax(class_output, dim=1)
+        domain_pred = torch.argmax(domain_output, dim=1)
 
         nb_correct_classification += torch.sum(prediction.eq(t_label))
+        nb_correct_domain += torch.sum(domain_pred==0)
         nb_samples += args.batch_size
 
-    accuracy = nb_correct_classification.data.numpy() / nb_samples
-    print('accuracy in test: %f' % (accuracy))
+    accuracy = nb_correct_classification.numpy() / nb_samples
+    dom_accuracy = nb_correct_domain.numpy() / nb_samples
+    print('accuracy in label classif test: %f' % (accuracy))
+    print('accuracy in domain classif test: %f' % (dom_accuracy))
 
 
 def score(model, data, target):
@@ -110,6 +119,9 @@ def score(model, data, target):
     # p = look in original paper for clues
     # alpha = look in original paper for clues
     data, target = data.type(torch.FloatTensor), target.type(torch.LongTensor)
+    if args.cuda:
+        data = data.cuda()
+        target = target.cuda()
     cf,df = model(data,target)
     
     df = df[:,0] / df.sum(dim=1)

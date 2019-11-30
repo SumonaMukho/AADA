@@ -17,12 +17,15 @@ parser.add_argument("--learning_rate", default=0.001, type=float)
 parser.add_argument("--max_round", default=5, type=int)
 parser.add_argument("--nb_experiments", default=1, type=int)
 parser.add_argument("--b", default=10, type=int, help="budget per round")
+parser.add_argument("--cuda", default=torch.cuda.is_available(), type=bool, help="Use of CUDA")
 
 args = parser.parse_args()
 
 torch.random.manual_seed(42)
 
 net = CNNModel()
+if args.cuda:
+    net.cuda()
 
 # Optimizer
 optimizer = optim.Adam(net.parameters(), lr=args.learning_rate)
@@ -51,10 +54,11 @@ for experiment in range(args.nb_experiments):
     # Active Learning process
     for round in range(args.max_round):
         print("Picking labels")
-        scores = score(net, target_train_loader.dataset.get_data(), target_train_loader.dataset.targets)
+        scores = score(net, args, target_train_loader.dataset.get_data(), target_train_loader.dataset.targets)
         scores = scores.cpu().numpy()
         new_labels = scores.argsort()[-args.b:]
         known_labels.append(new_labels)
+        print(len(known_labels),(round+1)*args.b)
         assert len(known_labels)==(round+1)*args.b
         print("\tPicked ",new_labels)
 
