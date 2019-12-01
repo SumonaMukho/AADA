@@ -38,6 +38,7 @@ class iSVHN(datasets.SVHN):
                  download=False):
         my_split = "train" if train==True else "test"
         super(iSVHN, self).__init__(root, split=my_split, transform=transform, target_transform=target_transform, download=download)
+        
     
     def __getitem__(self, index):
         d, l = super(iSVHN, self).__getitem__(index)
