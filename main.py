@@ -56,6 +56,7 @@ target_test_loader = torch.utils.data.DataLoader(target_test, batch_size=args.ba
 
 
 # The process
+arr = [0]*10
 for experiment in range(args.nb_experiments):
     print("First training")
     net = train(net, args, optimizer, source_train_loader, target_train_loader, None)
@@ -68,6 +69,9 @@ for experiment in range(args.nb_experiments):
         idxs, scores = score(net, args, target_train_loader, known_labels)
         new_labels = scores.argsort()[-args.b:]
         new_labels = idxs[new_labels]
+        for (x,y) in zip(*np.unique(target_train.targets[new_labels], return_counts=True)):
+            arr[x]+=y
+        print("New Labels :",arr)
         known_labels += new_labels.tolist()
         assert len(known_labels)==(round+1)*args.b
         print("\tPicked",len(new_labels),"labels")
