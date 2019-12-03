@@ -110,8 +110,8 @@ def test(net, args, test_loader_target):
         nb_correct_domain += torch.sum(domain_pred==0)
         nb_samples += args.batch_size
 
-    accuracy = nb_correct_classification.numpy() / nb_samples
-    dom_accuracy = nb_correct_domain.numpy() / nb_samples
+    accuracy = nb_correct_classification.cpu().numpy() / nb_samples
+    dom_accuracy = nb_correct_domain.cpu().numpy() / nb_samples
     print('\t Ac: %f & Ad: %f' % (accuracy, dom_accuracy))
 
 
