@@ -24,6 +24,9 @@ parser.add_argument('--no-cuda', dest='cuda', action='store_false')
 parser.set_defaults(cuda=torch.cuda.is_available())
 parser.add_argument('--verbose', dest='verbose', action='store_true')
 parser.set_defaults(verbose=False)
+parser.add_argument('--ent_reg', dest='ent_reg', action='store_true')
+parser.set_defaults(ent_reg=False)
+parser.add_argument('--reg_lambda', default=0.001, type=float)
 
 args = parser.parse_args()
 

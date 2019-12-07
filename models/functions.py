@@ -18,6 +18,8 @@ class ReverseLayerF(Function):
 
         return output, None
 
+def H(x):
+        return -1*torch.sum(torch.exp(x)* x, dim=1)
 
 def train(net, args, optimizer, train_loader_source, train_loader_target, known_labels):
     net.train()
@@ -67,14 +69,18 @@ def train(net, args, optimizer, train_loader_source, train_loader_target, known_
             class_output_target, domain_output_target = net(t_img, args.alpha)
             if known_labels and (np.isin(t_idx,known_labels)==True).any():
                 error_t_class = classification_loss(class_output_target[np.isin(t_idx,known_labels)] , t_label[np.isin(t_idx,known_labels)])
+                entropy_loss_target = H(class_output_target).sum()
             else:
                 error_t_class = 0
+                entropy_loss_target = 0
             error_t_domain = domain_loss(domain_output_target, domain_label_target)
 
 
             
             # Final Loss
             loss = error_s_class + error_s_domain + error_t_class + error_t_domain
+            if args.ent_reg:
+                loss+= H(class_output).sum() + args.reg_lambda*entropy_loss_target
 
             loss.backward()
             optimizer.step()
@@ -135,7 +141,6 @@ def score(model, args, train_loader_target, known_labels):
         
         w = (1 - df) / df  # Importance weight
         
-        H = lambda x : -1*torch.sum(torch.exp(x)* x, dim=1)
         if s is False:
             s = w * H(cf)
             s = s.cpu()
